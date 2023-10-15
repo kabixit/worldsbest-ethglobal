@@ -22,14 +22,7 @@ export default function AirdropPage() {
   const [recipientAddresses, setRecipientAddresses] = useState("");
   const [amounts, setAmounts] = useState("");
 
-  const handleRecipientAddressesChange = (event) => {
-    setRecipientAddresses(event.target.value);
-  };
-
-  const handleAmountsChange = (event) => {
-    setAmounts(event.target.value);
-  };
-
+  
   const handleAirdrop = async () => {
     // Split comma-separated addresses and amounts into arrays
     const recipientAddressesArray = recipientAddresses.split(',');
@@ -84,7 +77,7 @@ export default function AirdropPage() {
             placeholder="Recipient Addresses (comma-separated)"
             size="lg"
             value={recipientAddresses}
-            onChange={handleRecipientAddressesChange}
+            onChange={(e) => setRecipientAddresses(e.target.value)}
           />
         </Box>
         <Box mb={6}>
@@ -93,7 +86,7 @@ export default function AirdropPage() {
             placeholder="Amounts (comma-separated)"
             size="lg"
             value={amounts}
-            onChange={handleAmountsChange}
+            onChange={(e) => setAmounts(e.target.value)}
           />
         </Box>
         <Button
