@@ -12,10 +12,12 @@ import Navbar from './components/Navbar';
 import { useContract, useContractWrite, useAddress } from '@thirdweb-dev/react';
 
 export default function AirdropPage() {
-  const contractAddress = "0xe130669C544076bE32dEA26c11f0e73D7200f7aF";
+  const contractAddress = "0xDfc3D442f9d744cB11aAcC61c754421C6C0Dd359";
   const { contract } = useContract(contractAddress);
+  
   const account = useAddress();
-  const { mutateAsync: airdrop, isLoading } = useContractWrite(contract, "airdrop");
+
+  const { mutateAsync: airdropERC20, isLoading } = useContractWrite(contract, "airdropERC20")
 
   const [recipientAddresses, setRecipientAddresses] = useState("");
   const [amounts, setAmounts] = useState("");
@@ -34,7 +36,6 @@ export default function AirdropPage() {
     const amountsArray = amounts.split(',');
     
 
-
     try {
       // Ensure that the number of recipients matches the number of amounts
       if (recipientAddressesArray.length !== amountsArray.length) {
@@ -44,15 +45,19 @@ export default function AirdropPage() {
 
       // Convert addresses and amounts to the required format
       const _tokenAddress = "0x288319e58019460A6DA33F52F778a88B5BC18DaC";
-      const _tokenOwner = account;
-      const _recipients = recipientAddressesArray;
-      const _amounts = amountsArray.map(amount => String(parseInt(amount) * 1e18));
+      const _tokenOwner = "0x60117B4da2C71B092357CCc035F8C56f55b69538";
 
-      const data = await airdrop({ args: [_tokenAddress, _tokenOwner, _recipients, _amounts] });
-      console.info("Contract call success", data);
+      const _contents = recipientAddressesArray.map((recipient, index) => ({
+        recipient,
+        amount: String(parseInt(amountsArray[index]) * 1e18),
+      }));
+
+      const data = await airdropERC20({ args: [_tokenAddress, _tokenOwner, _contents] });
+      console.info("contract call successs", data);
     } catch (err) {
-      console.error("Contract call failure", err);
+      console.error("contract call failure", err);
     }
+  
   };
 
   return (
@@ -92,7 +97,7 @@ export default function AirdropPage() {
           />
         </Box>
         <Button
-          colorScheme="blue"
+          colorScheme="brand"
           size="lg"
           onClick={handleAirdrop}
           isLoading={isLoading}
