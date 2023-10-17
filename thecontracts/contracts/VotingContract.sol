@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 interface IVotingToken {
     function transferFrom(address from, address to, uint256 value) external returns (bool);
+    function approve(address spender, uint256 value) external returns (bool); // Added approve function
     function balanceOf(address account) external view returns (uint256);
 }
 
@@ -92,10 +93,13 @@ contract VotingSystem {
         require(projectId < projects.length, "Project does not exist");
         require(projects[projectId].status == Status.Pending, "Voting closed for this project");
         
+        // Approve the transfer of tokens before performing the transfer
+        require(token.approve(address(this), value), "Token approval failed");
         require(token.transferFrom(msg.sender, address(this), value), "Token transfer failed");
+
         projects[projectId].voteCount += value;
         votesCastByAddress[msg.sender] += value;
-        
+
         emit Voted(msg.sender, projectId, value);
     }
 
@@ -109,7 +113,7 @@ contract VotingSystem {
         hasVoted[projectId][msg.sender] = true;
 
         // Check for majority
-        if (projects[projectId].approvals > projects[projectId].rejections && projects[projectId].approvals > (isMajority())) {
+        if (projects[projectId].approvals > projects[projectId].rejections && projects[projectId].approvals > isMajority()) {
             projects[projectId].status = Status.Approved;
             emit StatusChanged(projectId, Status.Approved);
         }
@@ -125,7 +129,7 @@ contract VotingSystem {
         hasVoted[projectId][msg.sender] = true;
 
         // Check for majority
-        if (projects[projectId].rejections > projects[projectId].approvals && projects[projectId].rejections > (isMajority())) {
+        if (projects[projectId].rejections > projects[projectId].approvals && projects[projectId].rejections > isMajority()) {
             projects[projectId].status = Status.Rejected;
             emit StatusChanged(projectId, Status.Rejected);
         }
@@ -134,6 +138,9 @@ contract VotingSystem {
     function withdrawTokens(address to) external onlyOwner {
         uint256 amount = token.balanceOf(address(this));
         require(amount > 0, "No tokens to withdraw");
+
+        // Approve the transfer of tokens before performing the transfer
+        require(token.approve(to, amount), "Token approval failed");
         require(token.transferFrom(address(this), to, amount), "Token transfer failed");
     }
 
