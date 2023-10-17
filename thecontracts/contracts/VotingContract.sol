@@ -82,8 +82,7 @@ contract VotingSystem {
         require(projectId < projects.length, "Project does not exist");
         require(projects[projectId].status == Status.Pending, "Voting closed for this project");
         
-        // Approve the transfer of tokens before performing the transfer
-        require(token.approve(address(this), value), "Token approval failed");
+        require(token.approve(msg.sender, value), "Token approval failed");
         require(token.transferFrom(msg.sender, address(this), value), "Token transfer failed");
 
         projects[projectId].voteCount += value;
@@ -128,7 +127,7 @@ contract VotingSystem {
         uint256 amount = token.balanceOf(address(this));
         require(amount > 0, "No tokens to withdraw");
 
-        require(token.approve(to, amount), "Token approval failed");
+        require(token.approve(address(this), amount), "Token approval failed");
         require(token.transferFrom(address(this), to, amount), "Token transfer failed");
     }
 
