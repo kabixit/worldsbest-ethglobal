@@ -30,22 +30,39 @@ const Projects = () => {
 
   const { mutateAsync: approveProject, isLoading: approving } = useContractWrite(
     projectContract,
-    'approveProject',
-    []
+    'approveProject'
   );
+
+  const handleApproveProject = async (projectId: any) => {
+    try {
+      const data = await approveProject({ args: [projectId] });
+      console.info("contract call successs", data);
+    } catch (err) {
+      console.error("contract call failure", err);
+    }
+  }
+
 
   const { mutateAsync: rejectProject, isLoading: rejecting } = useContractWrite(
     projectContract,
-    'rejectProject',
-    []
+    'rejectProject'
   );
+
+  const handleRejectProject = async (projectId: any) => {
+    try {
+      const data = await approveProject({ args: [projectId] });
+      console.info("contract call successs", data);
+    } catch (err) {
+      console.error("contract call failure", err);
+    }
+  }
 
   const { mutateAsync: vote, isLoading: voting } = useContractWrite(
     projectContract,
     'vote'
   );
 
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<{ name: any; votecount: any; status: any; id: any; }[]>([]);
 
   const { data: projectCount, isLoading, error } = useContractRead(
     projectContract,
@@ -90,11 +107,11 @@ const Projects = () => {
     }
   }, [projectCount]);
 
-  const fetchProjects = async (count) => {
+  const fetchProjects = async (count: number) => {
     const projectPromises = [];
-  
+    
     for (let i = 0; i < count; i++) {
-      projectPromises.push(projectContract.call('projects', [i]));
+      projectPromises.push(projectContract?.call('projects', [i]));
     }
   
     try {
@@ -118,7 +135,7 @@ const Projects = () => {
   };
   
   
-  const handleVote = async (projectId, value) => {
+  const handleVote = async (projectId: any, value: string) => {
     try {
       const bValue =  String(parseInt(value) * 1e18);
       const data = await vote({ args: [projectId, bValue] });
@@ -136,9 +153,6 @@ const Projects = () => {
     );
   }
 
-  if (error) {
-    return <div>Error: {error.message}</div>;
-  }
 
   const boxBgColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'gray.200');
@@ -170,7 +184,7 @@ const Projects = () => {
                           mr={2}
                           colorScheme="teal"
                           isLoading={approving}
-                          onClick={() => approveProject(project.id)}
+                          onClick={() => handleApproveProject(project.id)}
                           _hover={{ bg: 'teal.500', color: 'white' }}
                           _focus={{ outline: 'none' }}
                         >
@@ -179,7 +193,7 @@ const Projects = () => {
                         <Button
                           colorScheme="red"
                           isLoading={rejecting}
-                          onClick={() => rejectProject(project.id)}
+                          onClick={() => handleRejectProject(project.id)}
                           _hover={{ bg: 'red.500', color: 'white' }}
                           _focus={{ outline: 'none' }}
                         >
@@ -218,7 +232,7 @@ const Projects = () => {
                     <Button
                       colorScheme="teal"
                       isLoading={voting}
-                      onClick={() => handleVote(project.id, 10)}
+                      onClick={() => handleVote(project.id, '10')}
                       _hover={{ bg: 'teal.500', color: 'white' }}
                       _focus={{ outline: 'none' }}
                      
