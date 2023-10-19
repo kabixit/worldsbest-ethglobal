@@ -164,7 +164,7 @@ const Projects = () => {
         <Text color={textColor}>No projects available.</Text>
       ) : (
         <>
-          <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+          <Grid templateColumns="repeat(5, 1fr)" gap={6}>
           {projects.map((project) => (
             <GridItem key={project.name}>
               <Box p={4} borderWidth={1} borderRadius="md" shadow="md" bg={boxBgColor}>
@@ -176,8 +176,7 @@ const Projects = () => {
                 >
                   {project.name.toString()}
                 </Heading>
-                {votingDeadlineTime > now ? (
-                  isJudge ? (
+                  {isJudge ? (
                     judgingDeadlineTime > now ? (
                       <>
                         <Button
@@ -227,8 +226,8 @@ const Projects = () => {
                         Judging time has not started yet
                       </Text>
                       </>
-                    )
-                  ) : (
+                    ) ) :
+                    votingDeadline > now?  (
                     <Button
                       colorScheme="teal"
                       isLoading={voting}
@@ -239,7 +238,6 @@ const Projects = () => {
                     >
                       Vote
                     </Button>
-                  )
                 ) : (
                   <Text mt={2} color={textColor} fontWeight="bold">
                     {isJudge ? 'Voting time has not started yet' : 'Voting time has not started yet'}
@@ -250,15 +248,15 @@ const Projects = () => {
           ))}
 
           </Grid>
-          <Flex align="center" justify="center" marginTop={5}>
+          <Flex align="center" justify="center" marginTop={3}>
             {votingDeadlineTime > now ? (
               <Text mt={2} color={textColor} fontWeight="bold">
-                {votingDaysLeft} {votingDaysLeft === 1 ? 'Day' : 'Days'} left for Voting
+                {votingDaysLeft} {votingDaysLeft === 1 ? 'Day' : 'Days'} left for Voting  
               </Text>
             ) : null}
             {judgingDeadlineTime > now ? (
               <Text mt={2} color={textColor} fontWeight="bold">
-                {judgingDaysLeft} {judgingDaysLeft === 1 ? 'Day' : 'Days'} left for Judging
+                   {judgingDaysLeft} {judgingDaysLeft === 1 ? 'Day' : 'Days'} left for Judging
               </Text>
             ) : null}
           </Flex>          

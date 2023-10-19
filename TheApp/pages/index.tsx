@@ -132,6 +132,7 @@ const HomePage = () => {
         color={textColor}
         animation="fadeIn 1s ease-in-out"
         justify="center"
+        mt="10vh"
       >
         <Heading as="h1" size="2xl" mb={4}>
           Welcome to WorldsBest.FYI
