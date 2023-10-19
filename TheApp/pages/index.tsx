@@ -4,6 +4,7 @@ import {
   Button,
   Center,
   ChakraProvider,
+  Container,
   extendTheme,
   Flex,
   Heading,
@@ -19,7 +20,8 @@ import Navbar from './components/Navbar';
 import { SearchIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import Projects from './Projects';
-import { useAddress, useContract, useContractRead, useContractWrite } from '@thirdweb-dev/react';
+import { useAddress, useContract, useContractRead, useContractWrite, ConnectWallet, useSwitchChain, useChain } from '@thirdweb-dev/react';
+
 
 const HomePage = () => {
   const boxBgColor = useColorModeValue('gray.200', 'gray.700');
@@ -30,7 +32,11 @@ const HomePage = () => {
   const { contract: tokenContract } = useContract('0x288319e58019460A6DA33F52F778a88B5BC18DaC'); // Replace with your token contract address
   const { contract: votingSystemContract } = useContract('0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC'); // Replace with your voting system contract address
   const account = useAddress();
+  const chain = useChain();
 
+
+
+  
   // Check allowance
   const { data: tokenAllowance } = useContractRead(tokenContract, "allowance", [account, votingSystemAddress]);
 
@@ -52,6 +58,68 @@ const HomePage = () => {
       console.error('Contract call failure', err);
     }
   };
+ 
+  if (!account) {
+    return (
+      <Container
+        maxW="100%"
+        bgColor={bgColor}
+        color={textColor}
+        justifyContent="center"
+        alignItems="center"
+        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
+        <Flex
+          h="100vh"
+          bgColor={bgColor}
+          color={textColor}
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <Heading
+            fontSize="24px"
+            fontWeight="bold"
+            marginBottom="5vh"
+          >
+            Please Connect a Wallet
+          </Heading>
+          <ConnectWallet theme="light" switchToActiveChain={true} modalSize="wide" />
+        </Flex>
+      </Container>
+    );
+  }
+
+  if (chain && chain.chainId !== 80001) {
+    return (
+      <Container
+        maxW="100%"
+        bgColor={bgColor}
+        color={textColor}
+        justifyContent="center"
+        alignItems="center"
+        style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      >
+        <Flex
+          h="100vh"
+          bgColor={bgColor}
+          color={textColor}
+          justifyContent="center"
+          alignItems="center"
+          flexDirection="column"
+        >
+          <Heading
+            fontSize="24px"
+            fontWeight="bold"
+            marginBottom="5vh"
+          >
+            Please Switch to Mumbai
+          </Heading>
+          <ConnectWallet theme="light" switchToActiveChain={true} modalSize="wide" />
+        </Flex>
+      </Container>
+    );
+  } 
 
   return (
     <>

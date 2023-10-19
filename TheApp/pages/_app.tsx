@@ -16,6 +16,9 @@ import {
   rainbowWallet,
   phantomWallet,
 } from "@thirdweb-dev/react";
+
+const activeChain = "mumbai";
+
 const theme = extendTheme({
   fonts: {
     body: 'Inter, sans-serif',
@@ -36,7 +39,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <ThirdwebProvider
       clientId="cd53e0c74ffcf66da0d8098ee483c4fc"
-      activeChain="mumbai"
+      activeChain={activeChain}
       supportedWallets={[
         metamaskWallet({ recommended: true }),
         coinbaseWallet(),

@@ -40,6 +40,7 @@ const Navbar = () => {
         <ConnectWallet
             theme={"dark"}
             modalSize={"wide"}
+            switchToActiveChain={true}
         />
       </Flex>
     </Box>
