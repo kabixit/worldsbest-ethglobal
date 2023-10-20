@@ -9,14 +9,15 @@ import {
   useColorModeValue,
   Spinner,
   Flex,
+  Icon,
 } from '@chakra-ui/react';
 import { useContract, useContractRead, useAddress, useContractWrite } from '@thirdweb-dev/react';
 import { useRouter } from 'next/router';
+import { FiArrowRight } from 'react-icons/fi';
 import Navbar from './components/Navbar';
 
-
 const Projects = () => {
-  const { contract: projectContract } = useContract('0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC'); // Replace with your project contract address
+  const { contract: projectContract } = useContract('0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC');
   const router = useRouter();
   const account = useAddress();
 
@@ -26,8 +27,6 @@ const Projects = () => {
     [account]
   );
 
-
-
   const { mutateAsync: approveProject, isLoading: approving } = useContractWrite(
     projectContract,
     'approveProject'
@@ -36,12 +35,11 @@ const Projects = () => {
   const handleApproveProject = async (projectId: any) => {
     try {
       const data = await approveProject({ args: [projectId] });
-      console.info("contract call successs", data);
+      console.info("contract call success", data);
     } catch (err) {
       console.error("contract call failure", err);
     }
   }
-
 
   const { mutateAsync: rejectProject, isLoading: rejecting } = useContractWrite(
     projectContract,
@@ -50,8 +48,8 @@ const Projects = () => {
 
   const handleRejectProject = async (projectId: any) => {
     try {
-      const data = await approveProject({ args: [projectId] });
-      console.info("contract call successs", data);
+      const data = await rejectProject({ args: [projectId] });
+      console.info("contract call success", data);
     } catch (err) {
       console.error("contract call failure", err);
     }
@@ -62,15 +60,13 @@ const Projects = () => {
     'vote'
   );
 
-  const [projects, setProjects] = useState<{ name: any; votecount: any; status: any; id: any; }[]>([]);
-
+  const [projects, setProjects] = useState([]);
   const { data: projectCount, isLoading, error } = useContractRead(
     projectContract,
     'getProjectsCount',
     []
   );
 
-  // Retrieve voting and judging deadlines
   const { data: votingDeadline, isLoading: votingDeadlineLoading } = useContractRead(
     projectContract,
     'votingDeadline',
@@ -83,21 +79,22 @@ const Projects = () => {
     []
   );
 
-   // Calculate time remaining for voting deadline
-  const now = new Date().getTime(); // Current time in milliseconds
-  const votingDeadlineTime = votingDeadline * 1000; // Convert votingDeadline to milliseconds
-  const votingTimeRemaining = Math.max(0, votingDeadlineTime - now); // Calculate time remaining
+  const now = new Date().getTime();
+  const votingDeadlineTime = votingDeadline * 1000;
+  const votingTimeRemaining = Math.max(0, votingDeadlineTime - now);
+  const votingDaysLeft = Math.floor(votingTimeRemaining / (1000 * 60 * 60 * 24));
 
-  // Convert the remaining time to a user-friendly format like "7 Days left"
-  const votingDaysLeft = Math.floor(votingTimeRemaining / (1000 * 60 * 60 * 24)); // Calculate days remaining
+  const judgingDeadlineTime = judgingDeadline * 1000;
+  const judgingTimeRemaining = Math.max(0, judgingDeadlineTime - now);
+  const judgingDaysLeft = Math.floor(judgingTimeRemaining / (1000 * 60 * 60 * 24));
 
-  const judgingDeadlineTime = judgingDeadline * 1000; // Convert votingDeadline to milliseconds
-  const judgingTimeRemaining = Math.max(0, judgingDeadlineTime - now); // Calculate time remaining
+  const isJudgingTimeOver = () => {
+    return now >= judgingDeadlineTime;
+  }
 
-  // Convert the remaining time to a user-friendly format like "7 Days left"
-  const judgingDaysLeft = Math.floor(judgingTimeRemaining / (1000 * 60 * 60 * 24)); // Calculate days remaining
-
-  // ...
+  const isVotingTimeOver = () => {
+    return now >= votingDeadlineTime;
+  }
 
   const userIsJudge = isJudge && !judgeLoading;
 
@@ -123,7 +120,7 @@ const Projects = () => {
           name,
           votecount,
           status,
-          id: index, // Using the index as a makeshift ID
+          id: index,
         };
       });
   
@@ -133,8 +130,7 @@ const Projects = () => {
       setProjects([]);
     }
   };
-  
-  
+
   const handleVote = async (projectId: any, value: string) => {
     try {
       const bValue =  String(parseInt(value) * 1e18);
@@ -145,124 +141,136 @@ const Projects = () => {
     }
   }
 
+  const handleViewProject = (projectId: any) => {
+    router.push(`/ViewProject/${projectId}`);
+  }
+
   if (isLoading || judgeLoading || votingDeadlineLoading || judgingDeadlineLoading) {
     return (
-      <Flex h="100vh" alignItems="center" justifyContent="center">
+      <Flex alignItems="center" justifyContent="center">
         <Spinner size="xl" color="teal" />
       </Flex>
     );
   }
 
-
   const boxBgColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.800', 'gray.200');
 
-    return (
-      <>
-    <Box p={8}  bg={useColorModeValue('gray.100', 'gray.900')}>
-      {projects.length === 0 ? (
-        <Text color={textColor}>No projects available.</Text>
-      ) : (
-        <>
-          <Grid templateColumns="repeat(5, 1fr)" gap={6}>
-          {projects.map((project) => (
-            <GridItem key={project.name}>
-              <Box p={4} borderWidth={1} borderRadius="md" shadow="md" bg={boxBgColor}>
-                <Heading
-                  as="h3"
-                  size="md"
-                  mb={2}
-                  color={useColorModeValue('gray.800', 'gray.200')}
-                >
-                  {project.name.toString()}
-                </Heading>
-                  {isJudge ? (
-                    judgingDeadlineTime > now ? (
-                      <>
-                        <Button
-                          mr={2}
-                          colorScheme="teal"
-                          isLoading={approving}
-                          onClick={() => handleApproveProject(project.id)}
-                          _hover={{ bg: 'teal.500', color: 'white' }}
-                          _focus={{ outline: 'none' }}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          colorScheme="red"
-                          isLoading={rejecting}
-                          onClick={() => handleRejectProject(project.id)}
-                          _hover={{ bg: 'red.500', color: 'white' }}
-                          _focus={{ outline: 'none' }}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                      <Button
-                          mr={2}
-                          colorScheme="teal"
-                          isLoading={approving}
-                          onClick={() => approveProject(project.id)}
-                          _hover={{ bg: 'teal.500', color: 'white' }}
-                          _focus={{ outline: 'none' }}
-                          isDisabled={true}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          colorScheme="red"
-                          isLoading={rejecting}
-                          onClick={() => rejectProject(project.id)}
-                          _hover={{ bg: 'red.500', color: 'white' }}
-                          _focus={{ outline: 'none' }}
-                          isDisabled={true}
-                        >
-                          Reject
-                        </Button>
-                      <Text mt={2} fontSize="xs" color={textColor} fontWeight="bold">
-                        Judging time has not started yet
-                      </Text>
-                      </>
-                    ) ) :
-                    votingDeadline > now?  (
-                    <Button
-                      colorScheme="teal"
-                      isLoading={voting}
-                      onClick={() => handleVote(project.id, '10')}
-                      _hover={{ bg: 'teal.500', color: 'white' }}
-                      _focus={{ outline: 'none' }}
-                     
+  return (
+    <>
+      <Navbar />
+      <Box p={8} bg={useColorModeValue('gray.100', 'gray.900')}>
+        {projects.length === 0 ? (
+          <Text color={textColor}>No projects available.</Text>
+        ) : (
+          <>
+            <Grid templateColumns="repeat(5, 1fr)" gap={6}>
+              {projects.map((project) => (
+                <GridItem key={project.name}>
+                  <Box p={4} borderWidth={1} borderRadius="md" shadow="md" bg={boxBgColor} position="relative">
+                    <Heading
+                      as="h3"
+                      size="md"
+                      mb={2}
+                      color={useColorModeValue('gray.800', 'gray.200')}
                     >
-                      Vote
-                    </Button>
-                ) : (
-                  <Text mt={2} color={textColor} fontWeight="bold">
-                    {isJudge ? 'Voting time has not started yet' : 'Voting time has not started yet'}
-                  </Text>
-                )}
-              </Box>
-            </GridItem>
-          ))}
-
-          </Grid>
-          <Flex align="center" justify="center" marginTop={3}>
-            {votingDeadlineTime > now ? (
-              <Text mt={2} color={textColor} fontWeight="bold">
-                {votingDaysLeft} {votingDaysLeft === 1 ? 'Day' : 'Days'} left for Voting  
-              </Text>
-            ) : null}
-            {judgingDeadlineTime > now ? (
-              <Text mt={2} color={textColor} fontWeight="bold">
-                   {judgingDaysLeft} {judgingDaysLeft === 1 ? 'Day' : 'Days'} left for Judging
-              </Text>
-            ) : null}
-          </Flex>          
-        </>
-      )}
-    </Box>
+                      {project.name.toString()}
+                    </Heading>
+                    {isJudge ? (
+                      judgingDeadlineTime > now ? (
+                        <>
+                          <Button
+                            mr={2}
+                            colorScheme="teal"
+                            isLoading={approving}
+                            onClick={() => handleApproveProject(project.id)}
+                            _hover={{ bg: 'teal.500', color: 'white' }}
+                            _focus={{ outline: 'none' }}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            colorScheme="red"
+                            isLoading={rejecting}
+                            onClick={() => handleRejectProject(project.id)}
+                            _hover={{ bg: 'red.500', color: 'white' }}
+                            _focus={{ outline: 'none' }}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          <Button
+                            mr={2}
+                            colorScheme="teal"
+                            isLoading={approving}
+                            onClick={() => approveProject(project.id)}
+                            _hover={{ bg: 'teal.500', color: 'white' }}
+                            _focus={{ outline: 'none' }}
+                            isDisabled={true}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            colorScheme="red"
+                            isLoading={rejecting}
+                            onClick={() => rejectProject(project.id)}
+                            _hover={{ bg: 'red.500', color: 'white' }}
+                            _focus={{ outline: 'none' }}
+                            isDisabled={true}
+                          >
+                            Reject
+                          </Button>
+                          <Text mt={2} fontSize="xs" color={textColor} fontWeight="bold">
+                            Judging time has not started yet
+                          </Text>
+                        </>
+                      )
+                    ) : votingDeadlineTime > now ? (
+                      <Button
+                        colorScheme="teal"
+                        isLoading={voting}
+                        onClick={() => handleVote(project.id, '10')}
+                        _hover={{ bg: 'teal.500', color: 'white' }}
+                        _focus={{ outline: 'none' }}
+                      >
+                        Vote
+                      </Button>
+                    ) : (
+                      <Text mt={2} color={textColor} fontWeight="bold">
+                        {isJudge ? 'Judging time is Over' : 'Voting time is Over'}
+                      </Text>
+                    )}
+                    <Icon
+                      as={FiArrowRight}
+                      color="black"
+                      fontSize="l"
+                      cursor="pointer"
+                      position="absolute"
+                      top={4}
+                      right={4}
+                      onClick={() => handleViewProject(project.id)}
+                    />
+                  </Box>
+                </GridItem>
+              ))}
+            </Grid>
+            <Flex align="center" justify="center" marginTop={3}>
+              {votingDeadlineTime > now ? (
+                <Text mt={2} color={textColor} fontWeight="bold">
+                  {votingDaysLeft} {votingDaysLeft === 1 ? 'Day' : 'Days'} left for Voting
+                </Text>
+              ) : null}
+              {judgingDeadlineTime > now ? (
+                <Text mt={2} color={textColor} fontWeight="bold">
+                  {judgingDaysLeft} {judgingDaysLeft === 1 ? 'Day' : 'Days'} left for Judging
+                </Text>
+              ) : null}
+            </Flex>
+          </>
+        )}
+      </Box>
     </>
   );
 };

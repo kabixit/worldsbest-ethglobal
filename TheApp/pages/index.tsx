@@ -21,6 +21,7 @@ import { SearchIcon } from '@chakra-ui/icons';
 import Link from 'next/link';
 import Projects from './Projects';
 import { useAddress, useContract, useContractRead, useContractWrite, ConnectWallet, useSwitchChain, useChain } from '@thirdweb-dev/react';
+import Winners from './Winners';
 
 
 const HomePage = () => {
@@ -42,12 +43,36 @@ const HomePage = () => {
 
   const { mutateAsync: approve, isLoading } = useContractWrite(tokenContract, 'approve');
 
+  const { data: votingDeadline, isLoading: votingDeadlineLoading } = useContractRead(
+    votingSystemContract,
+    'votingDeadline',
+    []
+  );
+
+  const { data: judgingDeadline, isLoading: judgingDeadlineLoading } = useContractRead(
+    votingSystemContract,
+    'judgingDeadline',
+    []
+  );
+
   // Determine the user's role (e.g., judge or regular user)
   const { data: isJudge, isLoading: judgeLoading } = useContractRead(
     votingSystemContract,
     'isJudge',
     [account]
   );
+
+  const now = new Date().getTime(); // Current time in milliseconds
+  const votingDeadlineTime = votingDeadline * 1000; // Convert votingDeadline to milliseconds
+  const judgingDeadlineTime = judgingDeadline * 1000; // Convert votingDeadline to milliseconds
+
+  const isJudgingTimeOver = () => {
+    return now >= judgingDeadlineTime;
+  }
+
+  const isVotingTimeOver = () => {
+    return now>=votingDeadlineTime
+  }
 
   // Handle approval button click
   const handleApprove = async () => {
@@ -121,6 +146,9 @@ const HomePage = () => {
     );
   } 
 
+
+
+
   return (
     <>
       <Navbar />
@@ -140,32 +168,41 @@ const HomePage = () => {
         <Text fontSize="xl" mb={6}>
           Find the best of buidls and vote here!
         </Text>
-        {isJudge ? (
-          <Projects />
+        {isVotingTimeOver() && isJudgingTimeOver() ? (
+          <>
+          <Heading as="h1" size="xl" mb={4}>The Winning BUIDLs are</Heading>
+          <Winners /> 
+          </> 
         ) : (
           <>
-            {tokenAllowance !== undefined && tokenAllowance.eq(0) ? (
-              <Box
-                p={4}
-                borderWidth={1}
-                borderRadius="md"
-                shadow="md"
-                bg={boxBgColor}
-                alignItems='center'
-                justifyContent='center'
-              >
-                <Text fontSize="lg">Approval is required to vote.</Text>
-                <Button
-                  mt={4}
-                  colorScheme="teal"
-                  isLoading={isLoading}
-                  onClick={handleApprove}
-                >
-                  Approve
-                </Button>
-              </Box>
-            ) : (
+            {isJudge ? (
               <Projects />
+            ) : (
+              <>
+                {tokenAllowance !== undefined && tokenAllowance.eq(0) ? (
+                  <Box
+                    p={4}
+                    borderWidth={1}
+                    borderRadius="md"
+                    shadow="md"
+                    bg={boxBgColor}
+                    alignItems='center'
+                    justifyContent='center'
+                  >
+                    <Text fontSize="lg">Approval is required to vote.</Text>
+                    <Button
+                      mt={4}
+                      colorScheme="teal"
+                      isLoading={isLoading}
+                      onClick={handleApprove}
+                    >
+                      Approve
+                    </Button>
+                  </Box>
+                ) : (
+                  <Projects />
+                )}
+              </>
             )}
           </>
         )}
@@ -175,3 +212,7 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
+
+

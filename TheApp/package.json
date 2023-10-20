@@ -14,12 +14,15 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@heroicons/react": "^1.0.6",
+    "@tableland/sdk": "^4.5.3-dev.0",
     "@thirdweb-dev/react": "^4.0.1",
     "bignumber.js": "^9.1.2",
+    "ethers": "^5.7.2",
     "framer-motion": "^10.16.4",
     "next": "13.5.4",
     "react": "^18",
     "react-dom": "^18",
+    "react-icons": "^4.11.0",
     "thirdweb": "^0.13.1"
   },
   "devDependencies": {

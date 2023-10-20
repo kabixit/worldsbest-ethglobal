@@ -15,85 +15,62 @@ contract VotingSystem {
         Status status;
     }
 
-    struct ProjectVotes {
-        uint256 projectId;
-        address voter;
-        uint256 vote;
-    }
-
     enum Status { Pending, Approved, Rejected }
 
     Project[] public projects;
     IVotingToken public token;
     
     address public owner;
-    address public admin;
     uint256 public votingDeadline;
     uint256 public judgingDeadline;
     mapping(address => bool) public isJudge;
     mapping(address => uint256) public votesCastByAddress;
     mapping(uint256 => mapping(address => bool)) public hasVoted; // projectId to judge's vote
-    mapping(uint256 => ProjectVotes[]) public projectVotes; // projectId to votes and voters
 
     event Voted(address indexed voter, uint256 indexed projectId, uint256 value);
     event StatusChanged(uint256 indexed projectId, Status newStatus);
     event ProjectAdded(uint256 indexed projectId, string name);
 
-    modifier onlyOwnerOrAdmin() {
-        require(msg.sender == owner || msg.sender == admin, "Only owner or admin can call this function");
-        _;
-    }
-
     modifier onlyJudge() {
         require(isJudge[msg.sender], "Only judges can call this function");
         _;
     }
-    
-       modifier onlyOwner() {
+
+    modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-
     constructor(address _tokenAddress) {
         token = IVotingToken(_tokenAddress);
         owner = msg.sender;
-        admin = address(0); // No admin initially
     }
 
-    function setAdmin(address _admin) external onlyOwner {
-        admin = _admin;
-    }
-
-    function removeAdmin() external onlyOwner {
-        admin = address(0);
-    }
-
-    function addJudge(address judge) external onlyOwnerOrAdmin {
+    function addJudge(address judge) external onlyOwner {
         isJudge[judge] = true;
     }
 
-    function removeJudge(address judge) external onlyOwnerOrAdmin {
+    function removeJudge(address judge) external onlyOwner {
         isJudge[judge] = false;
     }
 
-    function startVoting() external onlyOwnerOrAdmin {
+    function startVoting() external onlyOwner {
         votingDeadline = block.timestamp + 1 weeks;
     }
 
-    function endVoting() external onlyOwnerOrAdmin {
+    function endVoting() external onlyOwner {
         votingDeadline = block.timestamp;
     }
 
-    function startJudging() external onlyOwnerOrAdmin {
+    function startJudging() external onlyOwner {
         judgingDeadline = block.timestamp + 1 weeks;
     }
 
-    function endJudging() external onlyOwnerOrAdmin {
+    function endJudging() external onlyOwner {
         judgingDeadline = block.timestamp;
     }
 
-    function addProject(string memory name) external onlyOwnerOrAdmin {
+    function addProject(string memory name) external onlyOwner {
         uint256 projectId = projects.length;
         projects.push(Project(name, 0, 0, 0, Status.Pending));
         emit ProjectAdded(projectId, name);
@@ -108,9 +85,6 @@ contract VotingSystem {
 
         projects[projectId].voteCount += value;
         votesCastByAddress[msg.sender] += value;
-
-        // Record the vote for this project
-        projectVotes[projectId].push(ProjectVotes(projectId, msg.sender, value));
 
         emit Voted(msg.sender, projectId, value);
     }
@@ -147,7 +121,7 @@ contract VotingSystem {
         }
     }
 
-    function withdrawTokens(address to) external onlyOwnerOrAdmin {
+    function withdrawTokens(address to) external onlyOwner {
         uint256 amount = token.balanceOf(address(this));
         require(amount > 0, "No tokens to withdraw");
 
@@ -156,20 +130,5 @@ contract VotingSystem {
 
     function getProjectsCount() external view returns (uint256) {
         return projects.length;
-    }
-
-    function getVotesAndUsers(uint256 projectId) external view returns (address[] memory, uint256[] memory) {
-        require(projectId < projects.length, "Project does not exist");
-        
-        uint256 numVotes = projectVotes[projectId].length;
-        address[] memory voters = new address[](numVotes);
-        uint256[] memory votes = new uint256[](numVotes);
-        
-        for (uint256 i = 0; i < numVotes; i++) {
-            voters[i] = projectVotes[projectId][i].voter;
-            votes[i] = projectVotes[projectId][i].vote;
-        }
-
-        return (voters, votes);
     }
 }
