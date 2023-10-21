@@ -257,7 +257,11 @@ const Projects = () => {
                 </GridItem>
               ))}
             </Grid>
-            <Flex align="center" justify="center" marginTop={3}>
+
+ <Text mt={2} color={textColor} fontWeight="strong">
+                 1 Vote = 10 BEST
+                </Text> 
+           <Flex align="center" justify="center" marginTop={3}>
               {votingDeadlineTime > now ? (
                 <Text mt={2} color={textColor} fontWeight="bold">
                   {votingDaysLeft} {votingDaysLeft === 1 ? 'Day' : 'Days'} left for Voting
