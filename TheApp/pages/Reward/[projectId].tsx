@@ -58,7 +58,7 @@ const Reward = () => {
       const _tokenAddress = '0x288319e58019460A6DA33F52F778a88B5BC18DaC';
       const _tokenOwner = '0x60117B4da2C71B092357CCc035F8C56f55b69538';
 
-      const _contents = addresses.map((recipient, index) => ({
+      const _contents = addresses.map((recipient: any, index: string | number) => ({
         recipient,
         amount: String(parseInt(voteCounts[index])+(parseInt(voteCounts[index])/2)),
       }));
@@ -73,14 +73,14 @@ const Reward = () => {
   };
 
   return (
-    <Center minH="100vh" bgColor={bgColor} d="flex" flexDir="column" alignItems="center">
+    <Center minH="100vh" bgColor={bgColor} flexDir="column" alignItems="center">
       <Navbar />
       <Heading as="h1" size="xl" my={8}>
         Reward the Hackers
       </Heading>
       {!isLoading && data && data[0].length > 0 && (
         <Grid templateColumns="repeat(2, 1fr)" gap={4}>
-          {data[0].map((address, index) => (
+          {data[0].map((address:any, index: string | number) => (
             <React.Fragment key={address}>
               <GridItem bg={boxBgColor} fontWeight="bold" p={2} borderRadius="md" shadow="md">
                 <Text fontSize="md">
@@ -89,7 +89,7 @@ const Reward = () => {
                </GridItem>
               <GridItem bg={boxBgColor} p={2} borderRadius="md" shadow="md">
                 <Text fontSize="sm" fontWeight="bold">
-                  {parseInt(data[1][index] / 1e18).toString()}+{(parseInt(data[1][index] / 1e18).toString())/2} BEST Reward
+                  {(data[1][index] / 1e18)}+{((data[1][index] / 1e18))/2} BEST Reward
                 </Text>
               </GridItem>
             </React.Fragment>

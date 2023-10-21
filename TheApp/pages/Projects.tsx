@@ -21,6 +21,8 @@ const Projects = () => {
   const router = useRouter();
   const account = useAddress();
 
+  const [projects, setProjects] =  useState<{ name: any; votecount: any; status: any; id: any}[]>([]);
+
   const { data: isJudge, isLoading: judgeLoading } = useContractRead(
     projectContract,
     'isJudge',
@@ -60,7 +62,6 @@ const Projects = () => {
     'vote'
   );
 
-  const [projects, setProjects] = useState([]);
   const { data: projectCount, isLoading, error } = useContractRead(
     projectContract,
     'getProjectsCount',
