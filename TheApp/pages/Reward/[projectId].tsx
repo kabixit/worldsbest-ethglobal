@@ -76,7 +76,7 @@ const Reward = () => {
     <Center minH="100vh" bgColor={bgColor} flexDir="column" alignItems="center">
       <Navbar />
       <Heading as="h1" size="xl" my={8}>
-        Reward the Hackers
+        Reward the Winners
       </Heading>
       {!isLoading && data && data[0].length > 0 && (
         <Grid templateColumns="repeat(2, 1fr)" gap={4}>
