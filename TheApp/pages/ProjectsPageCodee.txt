@@ -14,7 +14,7 @@ import { useContract, useContractRead, useAddress } from '@thirdweb-dev/react';
 import { useRouter } from 'next/router';
 
 const ProjectsPage = () => {
-  const { contract: projectContract } = useContract('0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC'); // Replace with your project contract address
+  const { contract: projectContract } = useContract('0x21fB146A6F275898156ECA30801bA15C9A271eD2'); // Replace with your project contract address
   const [projects, setProjects] = useState([]);
   const router = useRouter();
 

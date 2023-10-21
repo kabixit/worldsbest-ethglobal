@@ -6,7 +6,7 @@ interface IVotingToken {
     function balanceOf(address account) external view returns (uint256);
 }
 
-contract VotingSystem {
+contract VotingContract {
     struct Project {
         string name;
         uint256 voteCount;

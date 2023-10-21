@@ -13,7 +13,7 @@ import {
 import { useContract, useContractRead } from '@thirdweb-dev/react';
 
 const Winners = () => {
-  const { contract: projectContract } = useContract('0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC'); // Replace with your project contract address
+  const { contract: projectContract } = useContract('0x21fB146A6F275898156ECA30801bA15C9A271eD2'); // Replace with your project contract address
 
   const [winningProjects, setWinningProjects] = useState<{ name: any; voteCount: any; }[]>([]);
 

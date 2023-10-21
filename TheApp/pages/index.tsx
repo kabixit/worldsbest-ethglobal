@@ -29,9 +29,9 @@ const HomePage = () => {
   const textColor = useColorModeValue('gray.800', 'gray.200');
   const bgColor = useColorModeValue('gray.100', 'gray.900');
 
-  const votingSystemAddress = "0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC";
+  const votingSystemAddress = "0x21fB146A6F275898156ECA30801bA15C9A271eD2";
   const { contract: tokenContract } = useContract('0x288319e58019460A6DA33F52F778a88B5BC18DaC'); // Replace with your token contract address
-  const { contract: votingSystemContract } = useContract('0x7Cf8579C3414B3fbBa7E6b971a9BC2806fcE6dfC'); // Replace with your voting system contract address
+  const { contract: votingSystemContract } = useContract('0x21fB146A6F275898156ECA30801bA15C9A271eD2'); // Replace with your voting system contract address
   const account = useAddress();
   const chain = useChain();
 
