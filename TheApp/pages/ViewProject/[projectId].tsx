@@ -12,7 +12,7 @@ const ViewProject = () => {
 
   const router = useRouter();
   const { projectId } = router.query;
-  const [projectData, setProjectData] = useState([]);
+  const [projectData, setProjectData] = useState<{ name: string; description: string; link: string; projects_id: number; votes: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +21,8 @@ const ViewProject = () => {
         const db = new Database();
         const tableName = "projects_table_80001_7901";
         const { results } = await db.prepare(`SELECT * FROM ${tableName} WHERE projects_id = ${projectId};`).all();
-        setProjectData(results);
+        console.log(results)
+        setProjectData(results as { name: string; description: string; link: string; projects_id: number; votes: number }[]);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data from Tableland:', error);
