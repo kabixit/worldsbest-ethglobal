@@ -1,4 +1,4 @@
-import { Box, Heading, Text, Spinner, Container, useColorModeValue, Link } from '@chakra-ui/react';
+import { Box, Heading, Text, Spinner, Container, useColorModeValue, Link, Button } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import React, { useState, useEffect } from 'react';
 import { Database } from '@tableland/sdk';
@@ -35,6 +35,12 @@ const ViewProject = () => {
     }
   }, [projectId]);
 
+  const handleGoBack = () => {
+    router.back(); // Function to navigate back
+  }
+
+
+
   return (
     <Container
       maxW="100%"
@@ -49,7 +55,19 @@ const ViewProject = () => {
       {loading ? (
         <Spinner size="xl" color="teal" mt={8} />
       ) : projectData.length > 0 ? (
-        <Box mt={8}>
+        <Box mt={8}> 
+           <Button
+              position="absolute" // Position the button absolutely
+              top="20" // Position at the top
+              left="30" // Position at the left
+              bgColor="black"
+              color="white"
+              onClick={() => handleGoBack()}
+              _hover={{ color: 'white' }}
+              _focus={{ color: 'white', outline: 'none' }}
+            >
+              Go back
+            </Button>
           {projectData.map((project) => (
             <Box
               key={project.projects_id}

@@ -17,7 +17,7 @@ import { FiArrowRight } from 'react-icons/fi';
 import Navbar from './components/Navbar';
 
 const Projects = () => {
-  const { contract: projectContract } = useContract('0x21fB146A6F275898156ECA30801bA15C9A271eD2');
+  const { contract: projectContract } = useContract('0x4BE413C64db50FB52A73e7521e9AaC5438C66bB8');
   const router = useRouter();
   const account = useAddress();
 

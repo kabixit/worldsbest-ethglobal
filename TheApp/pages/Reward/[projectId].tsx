@@ -28,7 +28,7 @@ const Reward = () => {
   const router = useRouter();
   const { projectId } = router.query;
 
-  const votingContractAddress = '0x21fB146A6F275898156ECA30801bA15C9A271eD2';
+  const votingContractAddress = '0x4BE413C64db50FB52A73e7521e9AaC5438C66bB8';
   const { contract: votingContract } = useContract(votingContractAddress);
 
   const { data, isLoading } = useContractRead(votingContract, 'getVotesAndUsers', [projectId]);

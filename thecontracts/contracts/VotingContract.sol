@@ -13,6 +13,7 @@ contract VotingContract {
         uint256 approvals;
         uint256 rejections;
         Status status;
+        uint256 projectId;
     }
 
     struct ProjectVotes {
@@ -32,15 +33,15 @@ contract VotingContract {
     uint256 public judgingDeadline;
     mapping(address => bool) public isJudge;
     mapping(address => uint256) public votesCastByAddress;
-    mapping(uint256 => mapping(address => bool)) public hasVoted; // projectId to judge's vote
-    mapping(uint256 => ProjectVotes[]) public projectVotes; // projectId to votes and voters
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
+    mapping(uint256 => ProjectVotes[]) public projectVotes;
 
     event Voted(address indexed voter, uint256 indexed projectId, uint256 value);
     event StatusChanged(uint256 indexed projectId, Status newStatus);
     event ProjectAdded(uint256 indexed projectId, string name);
 
     modifier onlyOwnerOrAdmin() {
-        require(msg.sender == owner || msg.sender == admin, "Only owner or admin can call this function");
+        require(isAdminOrOwner(msg.sender), "Only owner or admin can call this function");
         _;
     }
 
@@ -49,11 +50,10 @@ contract VotingContract {
         _;
     }
     
-       modifier onlyOwner() {
+    modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
     }
-
 
     constructor(address _tokenAddress) {
         token = IVotingToken(_tokenAddress);
@@ -95,8 +95,14 @@ contract VotingContract {
 
     function addProject(string memory name) external onlyOwnerOrAdmin {
         uint256 projectId = projects.length;
-        projects.push(Project(name, 0, 0, 0, Status.Pending));
+        projects.push(Project(name, 0, 0, 0, Status.Pending, projectId)); // Add projectId at the end
         emit ProjectAdded(projectId, name);
+    }
+
+    function setProjectStatusToPending(uint256 projectId) external onlyOwnerOrAdmin {
+        require(projectId < projects.length, "Project does not exist");
+        projects[projectId].status = Status.Pending;
+        emit StatusChanged(projectId, Status.Pending);
     }
 
     function vote(uint256 projectId, uint256 value) external {
@@ -171,5 +177,9 @@ contract VotingContract {
         }
 
         return (voters, votes);
+    }
+
+    function isAdminOrOwner(address account) internal view returns (bool) {
+        return account == owner || account == admin;
     }
 }

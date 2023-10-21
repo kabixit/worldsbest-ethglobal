@@ -18,7 +18,7 @@ import { useRouter } from 'next/router';
 const Winners = () => {
   const router = useRouter();
 
-  const { contract: projectContract } = useContract('0x21fB146A6F275898156ECA30801bA15C9A271eD2'); // Replace with your project contract address
+  const { contract: projectContract } = useContract('0x4BE413C64db50FB52A73e7521e9AaC5438C66bB8'); // Replace with your project contract address
 
   const [winningProjects, setWinningProjects] = useState<{ name: any; voteCount: any; projectId: any}[]>([]);
 
@@ -39,13 +39,13 @@ const Winners = () => {
 
     for (let i = 0; i < count; i++) {
       const projectData = await projectContract?.call('projects', [i]);
-      const [name, voteCount, approvals, rejections, status] = projectData;
+      const [name, voteCount, approvals, rejections, status, projectId] = projectData;
 
       if (status === 1) {
         winningProjects.push({
           name,
           voteCount,
-          projectId: i
+          projectId,
         });
       }
     }
