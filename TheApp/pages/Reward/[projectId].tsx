@@ -1,9 +1,23 @@
-import { Box, Heading, Text, Spinner, Container, useColorModeValue, Link } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import {
+  Box,
+  Heading,
+  Container,
+  useColorModeValue,
+  Button,
+  Grid,
+  GridItem,
+  Center,
+  Text
+} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import React, { useState, useEffect } from 'react';
-import { Database } from '@tableland/sdk';
-import Navbar from '../components/Navbar'; // Import your Navbar component
-import { useContract, useContractWrite, useAddress, useContractRead } from '@thirdweb-dev/react';
+import {
+  useContract,
+  useContractWrite,
+  useAddress,
+  useContractRead,
+} from '@thirdweb-dev/react';
+import Navbar from '../components/Navbar';
 
 const Reward = () => {
 
@@ -14,65 +28,79 @@ const Reward = () => {
   const router = useRouter();
   const { projectId } = router.query;
 
-  const airdropContractAddress = "0xDfc3D442f9d744cB11aAcC61c754421C6C0Dd359";
-  const { airdropContract } = useContract(airdropContractAddress);
+  const votingContractAddress = '0x21fB146A6F275898156ECA30801bA15C9A271eD2';
+  const { contract: votingContract } = useContract(votingContractAddress);
 
-  const votingContractAddress = "0x21fB146A6F275898156ECA30801bA15C9A271eD2";
-  const {votingContract } = useContract(votingContractAddress);
-  
+  const { data, isLoading } = useContractRead(votingContract, 'getVotesAndUsers', [projectId]);
+  console.log(data);
+
+  const [recipientAddresses, setRecipientAddresses] = useState('');
+  const [amounts, setAmounts] = useState('');
+
+  const airdropContractAddress = '0xDfc3D442f9d744cB11aAcC61c754421C6C0Dd359';
+  const { contract: airdropContract } = useContract(airdropContractAddress);
+  const { mutateAsync: airdropERC20, isLoading: isAirdropLoading } = useContractWrite(
+    airdropContract,
+    'airdropERC20'
+  );
+
   const account = useAddress();
 
-  const { mutateAsync: airdropERC20, isAirdropLoading } = useContractWrite(airdropContract, "airdropERC20")
-
-  const { data, isLoading } = useContractRead(votingContract, "getVotesAndUsers", [projectId])
-  console.log(data);
-  const [recipientAddresses, setRecipientAddresses] = useState("");
-  const [amounts, setAmounts] = useState("");
-
-  
   const handleAirdrop = async () => {
-    // Split comma-separated addresses and amounts into arrays
-    const recipientAddressesArray = recipientAddresses.split(',');
-    const amountsArray = amounts.split(',');
-    
+    if (!isLoading) {
+      const [addresses, voteCounts] = data;
 
-    try {
-      // Ensure that the number of recipients matches the number of amounts
-      if (recipientAddressesArray.length !== amountsArray.length) {
-        console.error("Number of recipients must match the number of amounts");
+      if (addresses.length !== voteCounts.length) {
+        console.error('Number of recipients must match the number of amounts');
         return;
       }
 
-      // Convert addresses and amounts to the required format
-      const _tokenAddress = "0x288319e58019460A6DA33F52F778a88B5BC18DaC";
-      const _tokenOwner = "0x60117B4da2C71B092357CCc035F8C56f55b69538";
+      const _tokenAddress = '0x288319e58019460A6DA33F52F778a88B5BC18DaC';
+      const _tokenOwner = '0x60117B4da2C71B092357CCc035F8C56f55b69538';
 
-      const _contents = recipientAddressesArray.map((recipient, index) => ({
+      const _contents = addresses.map((recipient, index) => ({
         recipient,
-        amount: String(parseInt(amountsArray[index]) * 1e18),
+        amount: String(parseInt(voteCounts[index])+(parseInt(voteCounts[index])/2)),
       }));
 
-      const data = await airdropERC20({ args: [_tokenAddress, _tokenOwner, _contents] });
-      console.info("contract call successs", data);
-    } catch (err) {
-      console.error("contract call failure", err);
+      try {
+        const data = await airdropERC20({ args: [_tokenAddress, _tokenOwner, _contents ]});
+        console.info('Airdrop successful', data);
+      } catch (err) {
+        console.error('Airdrop failed', err);
+      }
     }
-  
   };
 
   return (
-    <Container
-      maxW="100%"
-      bgColor={bgColor}
-      color={textColor}
-      justifyContent="center"
-      alignItems="center"
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
-    >
-        <Navbar /> 
-        <Heading as="h1" size="xl" mb={4}>Reward the Hackers</Heading>
-
-    </Container>
+    <Center minH="100vh" bgColor={bgColor} d="flex" flexDir="column" alignItems="center">
+      <Navbar />
+      <Heading as="h1" size="xl" my={8}>
+        Reward the Hackers
+      </Heading>
+      {!isLoading && data && data[0].length > 0 && (
+        <Grid templateColumns="repeat(2, 1fr)" gap={4}>
+          {data[0].map((address, index) => (
+            <React.Fragment key={address}>
+              <GridItem bg={boxBgColor} fontWeight="bold" p={2} borderRadius="md" shadow="md">
+                <Text fontSize="md">
+                  {address}
+                </Text>
+               </GridItem>
+              <GridItem bg={boxBgColor} p={2} borderRadius="md" shadow="md">
+                <Text fontSize="sm" fontWeight="bold">
+                  {parseInt(data[1][index] / 1e18).toString()}+{(parseInt(data[1][index] / 1e18).toString())/2} BEST Reward
+                </Text>
+              </GridItem>
+            </React.Fragment>
+          ))}
+        </Grid>
+      )}
+      <Button onClick={handleAirdrop} colorScheme="teal" size="lg" my={4}>
+        Perform Airdrop
+      </Button>
+    </Center>
   );
-}
+};
+
 export default Reward;
