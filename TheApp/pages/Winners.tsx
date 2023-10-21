@@ -75,7 +75,7 @@ const Winners = () => {
           </Text>
         </Center>
       ) : (
-        <Grid templateColumns="repeat(2, 1fr)" gap={6}>
+        <Grid templateColumns="repeat(5, 1fr)" gap={6}>
           {winningProjects.map((project, index) => (
             <GridItem key={index}>
               <Box p={4} borderWidth={1} borderRadius="md" shadow="md" bg={useColorModeValue('gray.200', 'gray.700')}
